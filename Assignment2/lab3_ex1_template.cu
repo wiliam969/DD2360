@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <sys/time.h>
-#include <stdlib.h>
+#include <stdlib.h> 
 
 #define Double double
 
@@ -17,6 +17,12 @@ const int TPB = 256;
 // Please complete the following main steps in your code. You can create your own code, or, 
 // use the following code template (Download Code Template Here hw2_ex1_template.cu 
 // Download hw2_ex1_template.cu ) and edit code parts demarcated by the //@@ comment lines. 
+
+double cpuSecond() {
+   struct timeval tp;
+   gettimeofday(&tp,NULL);
+   return ((double)tp.tv_sec + (double)tp.tv_usec*1.e-6);
+}
 
 __device__ Double addNum(Double x1, Double x2)
 {
@@ -87,20 +93,33 @@ int main(int argc, char **argv) {
   cudaMalloc(&deviceInput2, inputLength * sizeof(Double));
   cudaMalloc(&deviceOutput, inputLength * sizeof(Double));
 
+  double iStart = cpuSecond();
   //@@ Insert code to below to Copy memory to the GPU here
   cudaMemcpy(deviceInput1, hostInput1, inputLength * sizeof(Double), cudaMemcpyHostToDevice);
   cudaMemcpy(deviceInput2, hostInput2, inputLength * sizeof(Double), cudaMemcpyHostToDevice);
+  double iElaps = cpuSecond() - iStart;
+
+  printf("Copy CPU TO GPU: %f", iElaps);
 
   //@@ Initialize the 1D grid and block dimensions here
   dim3 dimGrid((inputLength + TPB - 1) / TPB, 1, 1);
 
   dim3 dimBlock(TPB, 1, 1);
 
+  iStart = cpuSecond();
   //@@ Launch the GPU Kernel here
   vecAdd<<<dimGrid, dimBlock>>>(deviceInput1, deviceInput2, deviceOutput, inputLength);
+  cudaDeviceSynchronize();
+  iElaps = cpuSecond() - iStart;
 
+  printf("Kernel: %f", iElaps);
   //@@ Copy the GPU memory back to the CPU here
+
+  iStart = cpuSecond();
   cudaMemcpy(resultRef, deviceOutput, inputLength * sizeof(Double), cudaMemcpyDeviceToHost);
+  iElaps = cpuSecond() - iStart;
+
+  printf("Copy GPU TO CPU: %f", iElaps);
   
   //@@ Insert code below to compare the output with the reference
   for (int i = 0; i < inputLength; i++)
