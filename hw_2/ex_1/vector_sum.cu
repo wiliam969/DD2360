@@ -1,7 +1,7 @@
-
 #include <stdio.h>
 #include <sys/time.h>
 #include <stdlib.h> 
+#include <cmath>
 
 #define Double double
 
@@ -35,10 +35,10 @@ __global__ void vecAdd(Double *in1, Double *in2, Double *out, Double len) {
 
 //@@ Insert code to implement timer start
 
-double cpuSecond() {
-   struct timeval tp;
-   gettimeofday(&tp,NULL);
-   return ((double)tp.tv_sec + (double)tp.tv_usec*1.e-6);
+long int cpuSecond() {
+  struct timeval timer;
+  gettimeofday(&timer, NULL);
+  return timer.tv_sec * 1000000 + timer.tv_usec;
 }
 
 int main(int argc, char **argv) {
@@ -53,14 +53,16 @@ int main(int argc, char **argv) {
   Double *deviceOutput;
 
   //@@ Insert code below to read in inputLength from args
-  if (argc > 1){
-    inputLength = std::atoi(argv[1]);
-
-    printf("arg 0 %s\n", argv[0]);
-    printf("arg 1 %s\n", argv[1]); 
+  if (argc != 2){
+    printf("!!\tNumber of arguments is not correct. Given %d, expected 1\n", argc - 1);
+    exit(1);
   }
 
-  printf("The input length is %d\n", inputLength);
+  printf("->\tStart of execution...\n");
+  
+  inputLength = std::atoi(argv[1]);
+
+  printf("->\tInput length dim (%d)\n", inputLength);
   
   //@@ Insert code below to allocate Host memory for input and output
   hostInput1 = (Double*)malloc(inputLength * sizeof(Double));
@@ -70,27 +72,33 @@ int main(int argc, char **argv) {
 
   //@@ Insert code below to initialize hostInput1 and hostInput2 to random numbers, and create reference result in CPU
   for (int i = 0; i < inputLength; i++) {
-        hostInput1[i] = rand() % 10;
-        hostInput2[i] = rand() % 10;
+        hostInput1[i] = (rand() % 1000) * sin(i);
+        hostInput2[i] = (rand() % 1000) * sin(i);
   }
+
+  printf("->\tRandom input vectors created...\n");
 
   for (int i = 0; i < inputLength; i++){
     hostOutput[i] = hostInput1[i] + hostInput2[i];
   }
+
+  printf("->\tReference vector created...\n");
 
   //@@ Insert code below to allocate GPU memory here
   cudaMalloc(&deviceInput1, inputLength * sizeof(Double));
   cudaMalloc(&deviceInput2, inputLength * sizeof(Double));
   cudaMalloc(&deviceOutput, inputLength * sizeof(Double));
 
-  double iStart = cpuSecond();
+  long int iStart = cpuSecond();
 
   //@@ Insert code to below to Copy memory to the GPU here
   cudaMemcpy(deviceInput1, hostInput1, inputLength * sizeof(Double), cudaMemcpyHostToDevice);
   cudaMemcpy(deviceInput2, hostInput2, inputLength * sizeof(Double), cudaMemcpyHostToDevice);
-  double iElaps = cpuSecond() - iStart;
+  long int iElaps = cpuSecond() - iStart;
+ 
+  printf("~~\tTime to copy memory to GPU: %ld\n", iElaps);
 
-  printf("Copy CPU TO GPU: %f", iElaps);
+  printf("->\tCuda memory initialized...\n");
 
   //@@ Initialize the 1D grid and block dimensions here
   dim3 dimGrid((inputLength + TPB - 1) / TPB, 1, 1);
@@ -103,23 +111,33 @@ int main(int argc, char **argv) {
   cudaDeviceSynchronize();
   iElaps = cpuSecond() - iStart;
 
-  printf("Kernel: %f", iElaps);
+  printf("~~\tTime to execute the kernel: %ld\n", iElaps);
+  printf("->\tGPU computation terminated...\n");
+
   //@@ Copy the GPU memory back to the CPU here
 
   iStart = cpuSecond();
-  cudaMemcpy(resultRef, deviceOutput, inputLength * sizeof(Double), cudaMemcpyDeviceToHost);
-  iElaps = cpuSecond() - iStart;
+  cudaError err =cudaMemcpy(resultRef, deviceOutput, inputLength * sizeof(Double), cudaMemcpyDeviceToHost);
+  if(err!=cudaSuccess) {
+      printf("!!\tCUDA error copying to Host: %s\n", cudaGetErrorString(err));
+      cudaFree(deviceInput1);
+      cudaFree(deviceInput2);
+      cudaFree(deviceOutput);
+      exit(2);
+  }
 
-  printf("Copy GPU TO CPU: %f", iElaps);
-  
+  iElaps = cpuSecond() - iStart;
+  printf("~~\tTime to copy memory from GPU: %ld\n", iElaps);
+ 
   //@@ Insert code below to compare the output with the reference
   for (int i = 0; i < inputLength; i++){
-     if(resultRef[i] == hostOutput[i]){
-        continue;
-     }
-
-     printf("Missmatch occured with row: %d, HValue: %f, DValue: %f\n", i, hostOutput[i], resultRef[i]);
+    if(abs(resultRef[i] - hostOutput[i]) >= 1){
+        printf("!!\tError in position (%d);\n", i);
+        printf("!!\tExpected %f, found %f\n\n", resultRef[i], hostOutput[i]);
+    }
   }
+
+  printf("->\tThe result provided by the GPU is correct!\n");
 
   // //@@ Free the GPU memory here
   cudaFree(deviceInput1); 

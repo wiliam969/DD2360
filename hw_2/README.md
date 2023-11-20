@@ -6,7 +6,7 @@ The exercise was developed on Google Colab.
 To compile the code, use: 
 
 ```bash
-nvcc exercise_1.cu -o vector_sum
+nvcc ex_1/vector_sum.cu -o vector_sum
 ```
 
 To execute the code:
@@ -21,7 +21,7 @@ The exercise was developed on Google Colab.
 To compile the code, use: 
 
 ```bash
-nvcc exercise_2.cu -o matrix_multiplication
+nvcc ex_2/matrix_multiplication.cu -o matrix_multiplication
 ```
 
 To execute the code:
