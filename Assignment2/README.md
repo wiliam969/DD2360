@@ -6,13 +6,13 @@ The exercise was developed on Google Colab.
 To compile the code, use: 
 
 ```bash
-nvcc lab3_ex1_template.cu -o lab3_ex1_template
+nvcc exercise_1.cu -o vector_sum
 ```
 
 To execute the code:
 
 ```bash
-./lab3_ex1_template size
+./vector_sum size
 ```
 
 ## Exercise 2 - Matrix multiplication
