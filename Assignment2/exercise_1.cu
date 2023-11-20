@@ -18,14 +18,7 @@ const int TPB = 256;
 // use the following code template (Download Code Template Here hw2_ex1_template.cu 
 // Download hw2_ex1_template.cu ) and edit code parts demarcated by the //@@ comment lines. 
 
-double cpuSecond() {
-   struct timeval tp;
-   gettimeofday(&tp,NULL);
-   return ((double)tp.tv_sec + (double)tp.tv_usec*1.e-6);
-}
-
-__device__ Double addNum(Double x1, Double x2)
-{
+__device__ Double addNum(Double x1, Double x2) {
   return x1 + x2; 
 }
 
@@ -34,18 +27,19 @@ __global__ void vecAdd(Double *in1, Double *in2, Double *out, Double len) {
   const int i = blockIdx.x*blockDim.x + threadIdx.x;
 
   if (i < len) {
+    const Double x = addNum(in1[i], in2[i]);
+    out[i] = x;
 
-  const Double x = addNum(in1[i], in2[i]);
-  out[i] = x;
-
-  //  printf("i: %d, in1: %f, in2: %f, out: %f\n", i, in1[i], in2[i], out[i]);
   }
 }
 
 //@@ Insert code to implement timer start
 
-//@@ Insert code to implement timer stop
-
+double cpuSecond() {
+   struct timeval tp;
+   gettimeofday(&tp,NULL);
+   return ((double)tp.tv_sec + (double)tp.tv_usec*1.e-6);
+}
 
 int main(int argc, char **argv) {
   
@@ -59,8 +53,7 @@ int main(int argc, char **argv) {
   Double *deviceOutput;
 
   //@@ Insert code below to read in inputLength from args
-  if (argc > 1)
-  {
+  if (argc > 1){
     inputLength = std::atoi(argv[1]);
 
     printf("arg 0 %s\n", argv[0]);
@@ -76,16 +69,13 @@ int main(int argc, char **argv) {
   resultRef  = (Double*)malloc(inputLength * sizeof(Double));
 
   //@@ Insert code below to initialize hostInput1 and hostInput2 to random numbers, and create reference result in CPU
-  for (int i = 0; i < inputLength; i++) 
-  {
+  for (int i = 0; i < inputLength; i++) {
         hostInput1[i] = rand() % 10;
         hostInput2[i] = rand() % 10;
   }
 
-  for (int i = 0; i < inputLength; i++)
-  {
+  for (int i = 0; i < inputLength; i++){
     hostOutput[i] = hostInput1[i] + hostInput2[i];
-    // printf("h1: %f + h2: %f = hO: %f\n", hostInput1[i], hostInput2[i], hostOutput[i]);
   }
 
   //@@ Insert code below to allocate GPU memory here
@@ -94,6 +84,7 @@ int main(int argc, char **argv) {
   cudaMalloc(&deviceOutput, inputLength * sizeof(Double));
 
   double iStart = cpuSecond();
+
   //@@ Insert code to below to Copy memory to the GPU here
   cudaMemcpy(deviceInput1, hostInput1, inputLength * sizeof(Double), cudaMemcpyHostToDevice);
   cudaMemcpy(deviceInput2, hostInput2, inputLength * sizeof(Double), cudaMemcpyHostToDevice);
@@ -122,10 +113,8 @@ int main(int argc, char **argv) {
   printf("Copy GPU TO CPU: %f", iElaps);
   
   //@@ Insert code below to compare the output with the reference
-  for (int i = 0; i < inputLength; i++)
-  {
-     if(resultRef[i] == hostOutput[i])
-     {
+  for (int i = 0; i < inputLength; i++){
+     if(resultRef[i] == hostOutput[i]){
         continue;
      }
 
