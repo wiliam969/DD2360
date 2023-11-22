@@ -1,6 +1,6 @@
 # Assignment 2
 
-## Exercise 1 - 
+## Exercise 1 - Vector sum
 
 The exercise was developed on Google Colab.
 To compile the code, use: 
