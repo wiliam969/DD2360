@@ -1,3 +1,5 @@
+%%writefile vector_sum.cu
+
 #include <stdio.h>
 #include <sys/time.h>
 #include <stdlib.h> 
