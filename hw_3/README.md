@@ -20,7 +20,7 @@ To execute the code:
 ./ex input_size
 ```
 
-## Exercise 2 - Partical Simulation
+## Exercise 2 - Particle Simulation
 
 To compile 
 
