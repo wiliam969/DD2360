@@ -33,7 +33,9 @@ __device__ Double addNum(Double x1, Double x2) {
 
 __global__ void vecAdd(Double* in1, Double* in2, Double* out, Double len) {
     //@@ Insert code to implement vector addition here
-    for (size_t i = threadIdx.x + blockDim.x * blockIdx.x; i < len; i += gridDim.x * blockDim.x) {
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (i < len) {
         const Double x = addNum(in1[i], in2[i]);
         out[i] = x;
     }
