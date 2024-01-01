@@ -19,3 +19,17 @@ To execute the code:
 ```bash
 ./ex input_size
 ```
+
+## Exercise 2 - Particle Simulation
+
+To compile 
+
+```bash
+make
+```
+
+To execute the code:
+
+```bash
+./bin/sputniPIC.out inputfiles/GEM_2D.inp
+```
