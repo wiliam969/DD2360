@@ -99,11 +99,11 @@ int main(int argc, char **argv) {
   double error;              // Variable for storing the relative error
   double tempLeft = 200.;    // Left heat source applied to the rod
   double tempRight = 300.;   // Right heat source applied to the rod
-  cublasHandle_t cublasHandle;      // cuBLAS handle
-  cusparseHandle_t cusparseHandle;  // cuSPARSE handle
-  cusparseSpMatDescr_t Adescriptor;   // Mat descriptor needed by cuSPARSE
-  cusparseDnVecDescr_t tempVecDescr;
-  cusparseDnVecDescr_t tmpVecDescr;
+  cublasHandle_t cublasHandle;          // cuBLAS handle
+  cusparseHandle_t cusparseHandle;      // cuSPARSE handle
+  cusparseSpMatDescr_t Adescriptor;     // Mat descriptor needed by cuSPARSE
+  cusparseDnVecDescr_t tempVecDescr;    // Temp vector descriptor 1
+  cusparseDnVecDescr_t tmpVecDescr;     // Temp vector descriptor 2
 
   // Read the arguments from the command line
   dimX = atoi(argv[1]);
@@ -150,8 +150,8 @@ int main(int argc, char **argv) {
     gpuCheck(cudaMemPrefetchAsync(temp,     dimX     * sizeof(double), cudaCpuDeviceId));
 
     gpuCheck(cudaMemPrefetchAsync(A,        nzv      * sizeof(double), cudaCpuDeviceId));
-    gpuCheck(cudaMemPrefetchAsync(AColIndx, nzv      * sizeof(int), cudaCpuDeviceId));
-    gpuCheck(cudaMemPrefetchAsync(ARowPtr,  dimX + 1 * sizeof(int), cudaCpuDeviceId));
+    gpuCheck(cudaMemPrefetchAsync(AColIndx, nzv      * sizeof(int),    cudaCpuDeviceId));
+    gpuCheck(cudaMemPrefetchAsync(ARowPtr,  dimX + 1 * sizeof(int),    cudaCpuDeviceId));
 
     #ifdef DEBUG
     cputimer_stop("Prefetching GPU memory to the host");
@@ -177,11 +177,13 @@ int main(int argc, char **argv) {
   memset(temp, 0, sizeof(double) * dimX);
   temp[0] = tempLeft;
   temp[dimX - 1] = tempRight;
+
   #ifdef DEBUG
   cputimer_stop("Initializing memory on the host");
   #endif
 
   if (concurrentAccessQ) {
+
     #ifdef DEBUG
     cputimer_start();
     #endif
@@ -259,6 +261,7 @@ int main(int argc, char **argv) {
 
   // Perform the time step iterations
   for (int it = 0; it < nsteps; ++it) {
+
     //@@ Insert code to call cusparse api to compute the SMPV (sparse matrix multiplication) for
     //@@ the CSR matrix using cuSPARSE. This calculation corresponds to:
     //@@ tmp = 1 * A * temp + 0 * tmp
