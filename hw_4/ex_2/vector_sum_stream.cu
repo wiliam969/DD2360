@@ -124,8 +124,8 @@ int main(int argc, char** argv) {
         remainder = input_length - seg_size * N_STREAMS;
     }
 
-    cudaStream_t streams[N_STREAMS];
-    for (int i = 0; i < N_STREAMS; i++) cudaStreamCreate(&streams[i]);
+      cudaStream_t streams[N_STREAMS];
+      for (int i = 0; i < N_STREAMS; i++) cudaStreamCreate(&streams[i]);
 
     //@@ Insert code to Copy memory to the GPU here
 
