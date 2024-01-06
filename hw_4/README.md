@@ -18,14 +18,17 @@ To execute the code:
 
 ## Exercise 3 - Heat Equation with using NVIDIA libraries
 
-To compile 
+The project was developed through Google Colab, and the files still have the Colab's directives to write files.
+
+In order to compile, use
 
 ```bash
-make
+nvcc heat_eq.cu -lcublas_static -lcublasLt_static -lculibos  -lcusparse -o  execute
 ```
 
-To execute the code:
+To run, use
 
 ```bash
-./bin/sputniPIC.out inputfiles/GEM_2D.inp
+./ex <size> <iterations>
 ```
+
