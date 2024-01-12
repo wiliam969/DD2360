@@ -2,18 +2,18 @@
 
 ## Exercise 2 - Cuda Streams
 
-- `ex_2/vector_sum_stream.cu` is the vec_add stream version;
+- `ex_2/vector_sum_stream_variable_kernel_launches.cu.cu` is the vec_add stream version;
 
 To compile the version
 
 ```bash
-nvcc ex_2/vector_sum_stream.cu -o vector_sum_stream
+nvcc ex_2/vector_sum_stream_variable_kernel_launches.cu -o vector_sum_stream_variable_kernel_launches
 ```
 
 To execute the code:
 
 ```bash
-./vector_sum_stream input_size stream_size
+./vector_sum_stream_variable_kernel_launches input_size stream_size
 ```
 
 ## Exercise 3 - Heat Equation with using NVIDIA libraries
